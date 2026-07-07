@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>애스테이 2차 주차현황 조회</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="gate">
+  <form id="gate-form">
+    <h1>입주민 확인</h1>
+    <p style="color: var(--text-sub); font-size: 14px; margin: 0 0 4px;">공용 비밀번호 4자리를 입력해주세요</p>
+    <input id="gate-input" type="text" inputmode="numeric" pattern="\d{4}" maxlength="4" autocomplete="off" placeholder="••••" />
+    <button type="submit" class="btn-primary">확인</button>
+    <p id="gate-error"></p>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="app-header">
+    <h1>애스테이 2차 주차현황 조회</h1>
+  </header>
+
+  <nav class="tabs" hidden>
+    <button class="tab-btn active" data-tab="search">검색</button>
+    <button class="tab-btn" data-tab="status">현황</button>
+  </nav>
+
+  <main>
+    <section id="tab-search">
+      <h2>이 차, 우리 주민일까요?</h2>
+      <form id="search-form">
+        <div class="plate-input-wrap">
+          <input id="plate-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="차량번호 뒷자리 4자리" autocomplete="off" />
+        </div>
+        <button type="submit" class="btn-primary">조회하기</button>
+      </form>
+      <p id="search-load-error" class="search-load-error"></p>
+      <div id="search-result"></div>
+    </section>
+
+    <section id="tab-status" hidden>
+      <div id="status-summary">총 0대</div>
+      <div class="status-table-wrap">
+        <table id="status-table">
+          <thead>
+            <tr><th>동</th><th>호</th><th>차량번호</th><th class="col-type">종류</th></tr>
+          </thead>
+          <tbody id="status-tbody"></tbody>
+        </table>
+        <p id="status-empty" hidden>등록된 차량이 없습니다.</p>
+      </div>
+      <p id="status-error" class="status-error"></p>
+    </section>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
