@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { normalizePlate, findMatches, parseVehiclesCSV, extractPassword } = require("./match.js");
+const { normalizePlate, findMatches, parseVehiclesCSV } = require("./match.js");
 
 const vehicles = [
   { dong: "101", ho: "1203", plate: "12가3456" },
@@ -31,8 +31,4 @@ assert.strictEqual(parsed.length, 2);
 assert.deepStrictEqual(parsed[0], { dong: "101", ho: "1203", plate: "12가3456", type: "자동차" });
 assert.strictEqual(parsed[1].type, "이륜차");
 
-// 7. extractPassword: 첫 4자리 숫자 추출
-assert.strictEqual(extractPassword("비밀번호\n5137\n"), "5137");
-assert.strictEqual(extractPassword(""), null);
-
-console.log("match.test.js: 7개 테스트 통과");
+console.log("match.test.js: 6개 테스트 통과");

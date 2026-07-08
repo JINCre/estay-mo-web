@@ -7,7 +7,7 @@ import * as matchLib from "../../match.js";
 const CACHE_TTL_MS = 60_000;
 // ponytail: Workers isolate 전역 변수로 60초 캐시. 콜드 isolate에서 가끔
 // 재fetch되는 건 무해 — 별도 캐시 스토어 불필요.
-let cache = { vehicles: null, password: null, fetchedAt: 0 };
+let cache = { vehicles: null, fetchedAt: 0 };
 
 const RATE_LIMIT_MAX = 10;
 const RATE_LIMIT_WINDOW_SEC = 60;
@@ -25,21 +25,14 @@ async function fetchText(url) {
   return res.text();
 }
 
-async function loadData(env) {
+async function loadVehicles(env) {
   const now = Date.now();
   if (cache.vehicles && now - cache.fetchedAt < CACHE_TTL_MS) {
-    return cache;
+    return cache.vehicles;
   }
-  const [vehiclesText, settingsText] = await Promise.all([
-    fetchText(env.VEHICLES_CSV_URL),
-    fetchText(env.SETTINGS_CSV_URL),
-  ]);
-  cache = {
-    vehicles: matchLib.parseVehiclesCSV(vehiclesText),
-    password: matchLib.extractPassword(settingsText),
-    fetchedAt: now,
-  };
-  return cache;
+  const vehiclesText = await fetchText(env.VEHICLES_CSV_URL);
+  cache = { vehicles: matchLib.parseVehiclesCSV(vehiclesText), fetchedAt: now };
+  return cache.vehicles;
 }
 
 // 읽기 전용: 이미 한도를 넘겼는지만 확인 (카운트 증가 없음)
@@ -80,14 +73,7 @@ export async function onRequestPost(context) {
   const password = String(body.password || "");
   const query = String(body.query || "").trim();
 
-  let data;
-  try {
-    data = await loadData(env);
-  } catch (e) {
-    return json(502, { error: "upstream" });
-  }
-
-  if (!data.password || password !== data.password) {
+  if (!env.GATE_PASSWORD || password !== env.GATE_PASSWORD) {
     await recordFailedAttempt(env, ip);
     return json(401, { error: "bad_password" });
   }
@@ -96,7 +82,15 @@ export async function onRequestPost(context) {
     return json(200, { status: "ok" });
   }
 
-  const matches = matchLib.findMatches(data.vehicles, query);
+  let vehicles;
+  try {
+    vehicles = await loadVehicles(env);
+  } catch (e) {
+    console.error("loadVehicles failed:", e && e.stack ? e.stack : e);
+    return json(502, { error: "upstream" });
+  }
+
+  const matches = matchLib.findMatches(vehicles, query);
 
   if (matches.length === 0) {
     return json(200, { status: "none" });

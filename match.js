@@ -38,12 +38,6 @@ function parseVehiclesCSV(text) {
     }));
 }
 
-// 구글시트 '설정' 탭 CSV에서 4자리 숫자 비밀번호 추출
-function extractPassword(text) {
-  const m = (text || "").match(/\d{4}/);
-  return m ? m[0] : null;
-}
-
 if (typeof module !== "undefined") {
-  module.exports = { normalizePlate, lastFourDigits, findMatches, parseVehiclesCSV, extractPassword };
+  module.exports = { normalizePlate, lastFourDigits, findMatches, parseVehiclesCSV };
 }
